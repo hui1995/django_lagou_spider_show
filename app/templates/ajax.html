@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/echarts.common.min.js') }}"></script>
+</head>
+<body>
+ <!--为ECharts准备一个具备大小（宽高）的Dom-->
+    <div id="main" style="height:500px;border:1px solid #ccc;padding:10px;"></div>
+
+    <script type="text/javascript">
+    //--- 折柱 ---
+    var myChart = echarts.init(document.getElementById('main'));
+
+    myChart.setOption({
+        title: {
+            text: '走势图'
+        },
+        tooltip: {},
+        legend: {
+            data:[]
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: {},
+        series: []
+
+    });
+
+
+    // 六个全局变量：插入时间、cpu1、cpu2、cpu3、cpu4、 哨兵（用于POST）
+    var time = ["","","","","","","","","","","",""],
+        java = [1,1,1,1,0,0,0,0,0,0,0,0],
+        python = [0,0,0,0,0,0,0,0,0,0,0,0],
+
+
+        lastID = 0; // 哨兵，记录上次数据表中的最后id +1（下次查询只要>=lastID）
+        line = 'line'
+
+    //准备好统一的 callback 函数
+    var update_mychart = function (data) { //data是json格式的response对象
+
+        myChart.hideLoading(); // 隐藏加载动画
+
+//        dataLength = data.time.length; //取回的数据长度
+//        lastID += dataLength; //哨兵，相应增加。
+//
+//        // 切片是能统一的关键！！
+//        time = time.slice(dataLength).concat(data.time); // 数组，先切片、再拼接
+//        java = java.slice(dataLength).concat(data.java.map(parseFloat)); //注意map方法
+//        python = python.slice(dataLength).concat(python.cpu2.map(parseFloat));
+
+        // 填入数据
+        myChart.setOption({
+            xAxis: {
+                data: data.time
+            },
+            series : getseries(data)
+        });
+
+        function getseries(data){
+            var serie = []
+            for(var i = 0; i< data.skill.length;i++){
+                var item = {
+                    type : 'line',
+                    name : data.skill[i],
+                    data : data.datas[i]
+                }
+                serie.push(item)
+            }
+            console.log(serie)
+            return serie
+        }
+
+//        myChart.setOption({
+//            xAxis: {
+//                data: data.time
+//            },
+//            series: [{
+//                type: line,
+//                name: 'Java', // 根据名字对应到相应的系列
+//                data: data.Java
+//            },{
+//                type: line,
+//                name: 'C++',
+//                data: data.C++
+//            },{
+//                type: line,
+//                name: 'PHP',
+//                data: data.PHP
+//            },{
+//                type: line,
+//                name: '数据挖掘',
+//                data: data.数据挖掘
+//            },{
+//                type: line,
+//                name: '搜索算法',
+//                data: data.搜索算法
+//            },{
+//                type: line,
+//                name: '精准推荐',
+//                data: data.精准推荐
+//            },
+////                {
+////                name: 'C#',
+////                data: data.C#
+////            },
+//            {
+//                type: line,
+//                name: 'C',
+//                data: data.C
+//            },{
+//                type: line,
+//                name: '全栈工程师',
+//                data: data.全栈工程师
+//            },
+////                {
+////                name: '.NET',
+////                data: data..NET
+////            },
+//            {
+//                type: line,
+//                name: 'Hadoop',
+//                data: data.Hadoop
+//            },{
+//                    type: line,
+//                name: 'Python',
+//                data: data.Python
+//            },{
+//                    type: line,
+//                name: 'Delphi',
+//                data: data.Delphi
+//            },{
+//                    type: line,
+//                name: 'VB',
+//                data: data.VB
+//            },{
+//                    type: line,
+//                name: 'Perl',
+//                data: data.Perl
+//            },{
+//                    type: line,
+//                name: 'Ruby',
+//                data: data.Ruby
+//            },
+////                {
+////                name: 'Node.js',
+////                data: data.Node.js
+////            },
+//            {
+//                type: line,
+//                name: 'Go',
+//                data: data.Go
+//            },{
+//                    type: line,
+//                name: 'ASP',
+//                data: data.ASP
+//            },{
+//                    type: line,
+//                name: 'Shell',
+//                data: data.Shell
+//            },{
+//                    type: line,
+//                name: '区块链',
+//                data: data.区块链
+//            },{
+//                    type: line,
+//                name: 'HTML5',
+//                data: data.HTML5
+//            },{
+//                    type: line,
+//                name: 'Android',
+//                data: data.Android
+//            },{
+//                    type: line,
+//                name: 'iOS',
+//                data: data.iOS
+//            },{
+//                    type: line,
+//                name: 'WP',
+//                data: data.WP
+//            },{
+//                    type: line,
+//                name: 'web前端',
+//                data: data.web前端
+//            },{
+//                    type: line,
+//                name: 'Flash',
+//                data: data.Flash
+//            },{
+//                    type: line,
+//                name: 'JavaScript',
+//                data: data.JavaScript
+//            },{
+//                    type: line,
+//                name: 'U3D',
+//                data: data.U3D
+//            },
+////                {
+////                name: 'COCOS2D-X',
+////                data: data.COCOS2D-X
+////            },
+//                {
+//                    type: line,
+//                name: '深度学习',
+//                data: data.深度学习
+//            },{
+//                    type: line,
+//                name: '机器学习',
+//                data: data.机器学习
+//            },{
+//                    type: line,
+//                name: '图像处理',
+//                data: data.图像处理
+//            },{
+//                    type: line,
+//                name: '图像识别',
+//                data: data.图像识别
+//            },{
+//                    type: line,
+//                name: '语音识别',
+//                data: data.语音识别
+//            },{
+//                    type: line,
+//                name: '机器视觉',
+//                data: data.机器视觉
+//            },{
+//                    type: line,
+//                name: '自然语言处理',
+//                data: data.自然语言处理
+//            },{
+//                    type: line,
+//                name: '软件测试',
+//                data: data.软件测试
+//            },{
+//                    type: line,
+//                name: '功能测试',
+//                data: data.功能测试
+//            },{
+//                    type: line,
+//                name: '性能测试',
+//                data: data.性能测试
+//            },{
+//                    type: line,
+//                name: '白盒测试',
+//                data: data.白盒测试
+//            },{
+//                    type: line,
+//                name: '黑盒测试',
+//                data: data.黑盒测试
+//            },{
+//                    type: line,
+//                name: '病毒分析',
+//                data: data.病毒分析
+//            },{
+//                    type: line,
+//                name: 'WEB安全',
+//                data: data.WEB安全
+//            },{
+//                    type: line,
+//                name: '网络安全',
+//                data: data.网络安全
+//            },{
+//                    type: line,
+//                name: '系统安全',
+//                data: data.系统安全
+//            },{
+//                    type: line,
+//                name: 'MySQL',
+//                data: data.MySQL
+//            },{
+//                    type: line,
+//                name: 'SQLServer',
+//                data: data.SQLServer
+//            },{
+//                    type: line,
+//                name: 'Oracle',
+//                data: data.Oracle
+//            },{
+//                    type: line,
+//                name: 'DB2',
+//                data: data.DB2
+//            },{
+//                    type: line,
+//                name: 'MongoDB',
+//                data: data.MongoDB
+//            },{
+//                    type: line,
+//                name: 'ETL',
+//                data: data.ETL
+//            },{
+//                    type: line,
+//                name: 'Hive',
+//                data: data.Hive
+//            },{
+//                    type: line,
+//                name: '数据仓库',
+//                data: data.数据仓库
+//            }]
+//        });
+
+//        if (dataLength == 0){clearInterval(timeTicket);} //如果取回的数据长度为0,停止ajax
+    }
+
+    myChart.showLoading(); // 首次显示加载动画
+
+    console.log("000")
+    // 异步加载数据 （首次，get，显示6个数据）
+    $.get('/ajax').done(update_mychart);
+    console.log("111")
+    $.post('/ajax').done(update_mychart);
+    // 异步更新数据 （以后，定时post，取回1个数据）
+//    var timeTicket = setInterval(function () {
+//        $.post('/ajax').done(update_mychart);
+//        console.log("222")
+//    }, 3000);
+
+    </script>
+</body>
+</html>

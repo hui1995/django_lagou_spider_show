@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>用户列表</title>
+<link rel="stylesheet" href="{{url_for('static',filename = '')}}">
+<script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+
+
+<body>
+
+
+<div class="modal fade" id="update" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">修改信息</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group" hidden>
+                        <label for="id" class="control-label">ID</label>
+                        <input type="text" class="form-control" id="id">
+                    </div>
+                    <div class="form-group">
+                        <label for="name" class="control-label">昵称</label>
+                        <input type="text" class="form-control" id="name">
+                    </div>
+                    <div class="form-group" hidden>
+                        <label for="account" class="control-label">账号</label>
+                        <input type="text" class="form-control" id="account">
+                    </div>
+                    <div class="form-group">
+                        <label for="userpwd" class="control-label">密码</label>
+                        <input type="text" class="form-control" id="userpwd">
+                    </div>
+                    <div class="form-group">
+                        <label for="againpwd" class="control-label">确认密码</label>
+                        <input type="password" class="form-control" id="againpwd">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="sub">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if result %}
+<div>
+    <table class="table" id="table">
+        <tr>
+            <th>编号</th>
+            <th>昵称</th>
+            <th>账号</th>
+            <th>密码</th>
+            <th>权限</th>
+            <th>操作</th>
+        </tr>
+        {% for u in result %}
+        <tr id="{{ u.userID }}">
+            <td>{{ u.userID }}</td>
+            <td>{{ u.userName }}</td>
+            <td>{{ u.userAccount }}</td>
+            <td>{{ u.userPwd }}</td>
+            <td>{% if u.Admin == 1 %}
+                是
+                {% else %}
+                否
+                {% endif %}
+            </td>
+            <td>
+                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#update"
+                        data-whatever="{{ u.userID }}">更新
+                </button>
+                <button type="button" class="btn btn-default" id="delete" onclick="deleteuser({{ u.userID }})">删除
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <nav aria-label="Page navigation" style="text-align: center">
+        <ul class="pagination">
+            <li>
+
+                <a href="#" onclick="showAtRight('{{url_for('main.userlist',page=pagination.page-1)}}')"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% for p in pagination.iter_pages() %}
+            <li class="{% if pagination.page == p %}active{% endif %}">
+                {% if p == None %}
+                <a class="disabled" href="#">...</a>
+                {% else %}
+
+                <a href="#" onclick="showAtRight('{{url_for('main.userlist',page=p)}}')">{{p}}</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+            <li>
+
+                <a href="#" onclick="showAtRight('{{url_for('main.userlist',page=pagination.page+1)}}')"
+                   aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{% else %}
+<div>
+    <p>还没有用户</p>
+</div>
+{% endif %}
+</body>
+
+<script>
+
+    $('#sub').click(function(){
+        var id = $('#id').val()
+        var name = $('#name').val()
+        var account = $('#account').val()
+        var userpwd = $('#userpwd').val()
+        var againpwd = $('#againpwd').val()
+        $.post('/updateuser',{'userid':id,'username':name,'useraccount':account,'userpwd':userpwd,'againpwd':againpwd}).done(result)
+    })
+
+    var result = function(data){
+        alert(data)
+        window.location.reload();
+    }
+
+    $('#update').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var id = button.data('whatever') // Extract info from data-* attributes
+//        var name = document.getElementById("table").rows[id].cells[1].innerText;
+//        var account = document.getElementById("table").rows[id].cells[2].innerText;
+//        var userpwd = document.getElementById("table").rows[id].cells[3].innerText;
+        var name = document.getElementById(id).cells[1].innerText;
+        var account = document.getElementById(id).cells[2].innerText;
+        var userpwd = document.getElementById(id).cells[3].innerText;
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+        modal.find('.modal-title').text('更新' + name)
+        //modal.find('.modal-body input').val(id)
+        $('#id').val(id)
+        $('#name').val(name)
+        $('#account').val(account)
+        $('#userpwd').val(userpwd)
+        $('#againpwd').val(userpwd)
+    })
+</script>
+
+{% endblock %}

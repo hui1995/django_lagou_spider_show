@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>简单查询</title>
+<script src="{{url_for('static',filename = 'js/simple.js')}}"></script>
+<script src="{{url_for('static',filename = 'js/jquery.js')}}"></script>
+<script src="{{url_for('static',filename = 'js/jquery.min.js')}}"></script>
+<script src="{{url_for('static',filename = 'js/City_data.js')}}"></script>
+<script src="{{url_for('static',filename = 'js/areadata.js')}}"></script>
+<script src="{{url_for('static',filename = 'js/auto_area.js')}}"></script>
+<script src="{{url_for('static',filename = 'js/bootstrap-select.min.js')}}"></script>
+
+
+
+<script src="{{url_for('static',filename = 'js/bootstrap-datepicker.min.js')}}"></script>
+<script src="{{url_for('static',filename = 'js/bootstrap-datepicker.zh-CN.js')}}"></script>
+
+<link rel="stylesheet" href="{{url_for('static',filename = 'css/simple.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename = 'css/common.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename = 'css/style.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename = 'css/bootstrap-datepicker.min.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename = 'css/bootstrap-select.min.css')}}">
+{% endblock %}
+
+{% block main %}
+<div class="form-group">
+    <form method="get" action="/pro_query">
+        <label>关键字<input class="form-control" type="text" name="search" value="{{search}}"></label>
+        <label>城市选择<input name="city"  type="text" class="area-danxuan form-control" value="{{city}}" data-value="" /></label>
+        <br>
+        <label>月薪
+            <select name="salary" id="salary" class="selectpicker">
+                <option value="不限">不限</option>
+                <option value="1k-5k">1k-5k</option>
+                <option value="5k-10k">5k-10k</option>
+                <option value="10k-15k">10k-15k</option>
+                <option value="15k-20k">15k-20k</option>
+                <option value="20k以上">20k以上</option>
+            </select>
+        </label>
+
+        <label>学历
+            <select name="education" id="education" class="selectpicker">
+                <option value="不限">不限</option>
+                <option value="大专">大专</option>
+                <option value="本科">本科</option>
+                <option value="硕士">硕士</option>
+                <option value="博士">博士</option>
+            </select>
+        </label>
+
+        <label>工作经验
+            <select name="workyear" id="workyear" class="selectpicker">
+                <option value="不限">不限</option>
+                <option value="应届毕业生">应届毕业生</option>
+                <option value="1年以下">1年以下</option>
+                <option value="1-3年">1-3年</option>
+                <option value="3-5年">3-5年</option>
+                <option value="5-10年">5-10年</option>
+                <option value="10年以上">10年以上</option>
+            </select>
+        </label>
+        <br>
+
+        <label>发布日期
+        <input style="width: 200px;display: inline-block;" class="form-control" name="date_begin" type="text" id="date_begin" value="{{date_begin}}"/>~
+        <input style="width: 200px;display: inline-block;" class="form-control" name="date_end" type="text" id="date_end" value="{{date_end}}"/>
+        </label>
+        <br>
+        <input class="btn btn-default" type="submit" value="查询">
+    </form>
+</div>
+
+<script>
+    function DatePicker(beginSelector,endSelector){
+            // 仅选择日期
+            $(beginSelector).datepicker(
+            {
+            	language:  "zh-CN",
+            	autoclose: true,
+            	startView: 0,
+            	format: "yyyy-mm-dd",
+            	clearBtn:true,
+            	todayBtn:false,
+            	endDate:new Date()
+            }).on('changeDate', function(ev){
+            	if(ev.date){
+            		$(endSelector).datepicker('setStartDate', new Date(ev.date.valueOf()))
+            	}else{
+            		$(endSelector).datepicker('setStartDate',null);
+            	}
+            })
+
+            $(endSelector).datepicker(
+            {
+            	language:  "zh-CN",
+            	autoclose: true,
+            	startView:0,
+            	format: "yyyy-mm-dd",
+            	clearBtn:true,
+            	todayBtn:false,
+            	endDate:new Date()
+            }).on('changeDate', function(ev){
+            	if(ev.date){
+            		$(beginSelector).datepicker('setEndDate', new Date(ev.date.valueOf()))
+            	}else{
+            		$(beginSelector).datepicker('setEndDate',new Date());
+            	}
+
+            })
+        }
+
+        DatePicker("#date_begin","#date_end");
+
+
+</script>
+
+{% if result %}
+<div style="height: 80%" class="simple">
+    <table class="table">
+        <tr>
+            <th>职位编号</th>
+            <th width="180px">职位名称</th>
+            <th width="180px">公司简称</th>
+            <th>所在城市</th>
+            <th>基本薪资</th>
+            <th>学历要求</th>
+            <th>工作经验</th>
+            <th>发布时间</th>
+        </tr>
+        {% for r in result %}
+        <tr>
+            <td height="57px"><a href="https://www.lagou.com/jobs/{{r.positionId}}.html">{{ r.positionId }}</a></td>
+            <td height="57px">{{ r.positionName }}</td>
+            <td height="57px">{{ r.companyShortName }}</td>
+            <td height="57px">{{ r.city }}</td>
+            <td height="57px">{{ r.salary }}</td>
+            <td height="57px">{{ r.education }}</td>
+            <td height="57px">{{ r.workYear }}</td>
+            <td height="57px">{{ r.createTime }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <nav aria-label="Page navigation" style="text-align: center">
+        <ul class="pagination">
+            <li>
+                <a href="{% if pagination.has_prev %}{{url_for('main.pro_query',page=pagination.page-1,search=search,city=city,salary=salary,
+                           education=education,workyear=workyear,date_begin=date_begin,
+                           date_end=date_end)}}{% else %}#{% endif %}"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% for p in pagination.iter_pages() %}
+            <li class="{% if pagination.page == p %}active{% endif %}">
+                {% if p == None %}
+                <a class="disabled" href="#">...</a>
+                {% else %}
+                <a href="{{url_for('main.pro_query',page=p,search=search,city=city,salary=salary,
+                           education=education,workyear=workyear,date_begin=date_begin,
+                           date_end=date_end)}}">{{p}}</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+            <li>
+                <a href="{%if pagination.has_next %}{{url_for('main.pro_query',page=pagination.page+1,search=search,city=city,salary=salary,
+                           education=education,workyear=workyear,date_begin=date_begin,
+                           date_end=date_end)}}{% else %}#{% endif %}"
+                   aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{% else %}
+<div>
+    <p>没有查询到结果</p>
+</div>
+{% endif %}
+
+{% endblock %}

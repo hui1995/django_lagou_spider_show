@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/echarts.common.min.js') }}"></script>
+</head>
+<body>
+<div id="main" style="height:800px;border:1px solid #ccc;padding:10px;"></div>
+
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('main'));
+        option1 = {
+        title : {
+            text: '城市分布饼图',
+            subtext: '纯属虚构',
+            x:'center'
+        },
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+        legend: {
+            orient: 'vertical',
+            left: 'left',
+            data: ['直接访问','邮件营销','联盟广告','视频广告','搜索引擎']
+        },
+        series : [
+            {
+                name: '访问来源',
+                type: 'pie',
+                radius : '55%',
+                center: ['50%', '60%'],
+                data:[
+                    
+                ],
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }
+        ]
+    };
+        option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b}: {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                x: 'left',
+                data:['直接访问','邮件营销','联盟广告','视频广告','搜索引擎']
+            },
+            series: [
+                {
+                    name:'访问来源',
+                    type:'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: false,
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '30',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data:[
+
+                    ]
+                }
+            ]
+        };
+
+        myChart.setOption(option1);
+
+        var update_mychart = function (data) {
+            console.log(data)
+            myChart.hideLoading();
+            myChart.setOption({
+                series : [{
+                    data:getseries(data)
+                }
+                ]
+            });
+
+        };
+
+        function getseries(data){
+            var serie = []
+                for(var i = 0; i<data.num.length;i++){
+                    var item = {
+                        name:data.city[i],
+                        value:data.num[i],
+
+                    }
+                    serie.push(item)
+                }
+                console.log(serie)
+                return serie
+        }
+        myChart.showLoading();
+        console.log("000")
+        // 异步加载数据 （首次，get，显示6个数据）
+        $.get('/ajax2').done(update_mychart);
+        console.log("111")
+        $.post('/ajax2').done(update_mychart);
+</script>
+</body>
+</html>

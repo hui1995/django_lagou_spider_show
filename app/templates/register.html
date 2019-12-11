@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>注册</title>
+    <script src="{{url_for('static',filename = 'js/register.js')}}"></script>
+{% endblock %}
+{% block main %}
+<div style="padding: 20px 30%">
+    <div class="form-group">
+        <h1>注册</h1>
+        <form method="post" action="/register">
+            <label>账号</label><br><input class="form-control" type="text" id="useraccount"><br>
+            <laber>用户名</laber><br><input class="form-control" type="text" id="username"><br>
+            <label>密码</label><br><input class="form-control" type="password" id="userpwd"><br>
+            <label>确认密码</label><br><input class="form-control" type="password" id="againpwd"><br>
+            <input class="btn btn-default" type="button" id="sub" value="注册">
+        </form>
+    </div>
+</div>
+<script>
+    $('#sub').click(function(){
+        var useraccount = document.getElementById("useraccount").value;
+        var username = document.getElementById("username").value;
+        var userpwd = document.getElementById("userpwd").value;
+        var againpwd = document.getElementById("againpwd").value;
+        //$.post('/register', {"useraccount": useraccount,"username": username,"userpwd": userpwd,"againpwd": againpwd,}).done(result)
+        $.post('/register', {"useraccount": useraccount,"username": username,"userpwd": userpwd,"againpwd": againpwd}).done(result)
+    })
+
+    var result = function (data) {
+        if(data == '注册成功'){
+            window.location.href = "{{url_for('main.register_success') }}";
+        }
+        else{
+            alert(data)
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>主页</title>
+<script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+<script src="{{ url_for('static', filename='js/echarts.common.min.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+<div style="overflow: auto;height: 100%;padding: 20px 10px">
+<div class="jumbotron">
+  <h1>近期招聘信息展示网站</h1>
+</div>
+
+{% if skill %}
+<div>
+    <ul class="nav nav-pills" role="tablist">
+        {% for s in skill %}
+        <li role="presentation">
+            <a href="{{url_for('main.simple_query',search=s.skillName)}}">{{ s.skillName }}
+                {% if s.skillNum != 0 %}
+                <span class="badge">{{ s.skillNum }}</span>
+                {% endif %}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+<div id="main" style="height:1000px;border:1px solid #ccc;padding:10px;"></div>
+</div>
+<script>
+    var myChart = echarts.init(document.getElementById('main'));
+    option = {
+    title: {
+        text: '计算机岗位数',
+        subtext: '数据来自lagou.com'
+    },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'shadow'
+        }
+    },
+    legend: {
+        data: []
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'value',
+        boundaryGap: [0, 0.01]
+    },
+    yAxis: {
+    },
+    series: [
+            ]
+};
+    myChart.setOption(option)
+    var update_mychart = function (data) { //data是json格式的response对象
+
+        myChart.hideLoading(); // 隐藏加载动画
+        // 填入数据
+        myChart.setOption({
+            yAxis: {
+                type: 'category',
+                data: data.skill
+            },
+            series: [
+                {
+                    name: '总数',
+                    type: 'bar',
+                    data: data.data
+                }
+            ]
+        });
+    }
+
+    myChart.showLoading(); // 首次显示加载动画
+
+    console.log("000")
+    // 异步加载数据 （首次，get，显示6个数据）
+    $.get('/index').done(update_mychart);
+    console.log("111")
+    $.post('/index').done(update_mychart);
+
+
+</script>
+{% endif %}
+
+{% endblock %}

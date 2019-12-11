@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>{{user.userName}}的空间</title>
+<style>
+    p {
+        display: inline;
+    }
+    span {
+        font-size: 20px;
+    }
+</style>
+<script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+<script src="{{ url_for('static', filename='js/load_hycode.js') }}"></script>
+<script src="{{ url_for('static', filename='js/hgz_hycode.js') }}"></script>
+<script src="{{ url_for('static', filename='js/hgz_zncode.js') }}"></script>
+<link rel="stylesheet" href="{{url_for('static',filename = 'css/style2.css')}}">
+{% endblock %}
+
+{% block main %}
+
+<div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">修改信息</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group" hidden>
+                        <label for="id" class="control-label">ID</label>
+                        <input type="text" class="form-control" id="id">
+                    </div>
+                    <div class="form-group">
+                        <label for="name" class="control-label">昵称</label>
+                        <input type="text" class="form-control" id="name">
+                    </div>
+                    <div class="form-group" hidden>
+                        <label for="account" class="control-label">账号</label>
+                        <input type="text" class="form-control" id="account">
+                    </div>
+                    <div class="form-group">
+                        <label for="userpwd" class="control-label">密码</label>
+                        <input type="password" class="form-control" id="userpwd">
+                    </div>
+                    <div class="form-group">
+                        <label for="againpwd" class="control-label">确认密码</label>
+                        <input type="password" class="form-control" id="againpwd">
+                    </div>
+                    <div class="form-group">
+                        <label for="age" class="control-label">年龄</label>
+                        <input type="text" class="form-control" id="age">
+                    </div>
+                    <div class="form-group">
+                        <label for="city" class="control-label">城市</label>
+                        <input type="text" class="form-control" id="city">
+                    </div>
+                    <div class="form-group">
+                        <label for="industry" class="control-label">行业</label>
+                        <input type="text" class="form-control" id="industry"  data-value=""  onclick="appendhybar(this,'danxuan')">
+                    </div>
+                    <div class="form-group">
+                        <label for="profession" class="control-label">职业</label>
+                        <input type="text" class="form-control" id="profession"  data-value=""  onclick="appendhyznbar(this,'danxuan')">
+                    </div>
+                    <div class="form-group">
+                        <label for="company" class="control-label">公司</label>
+                        <input type="text" class="form-control" id="company">
+                    </div>
+                    <div class="form-group">
+                        <label for="sign" class="control-label">签名</label>
+                        <input type="text" class="form-control" id="sign">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary " id="sub">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div style="padding: 50px">
+<h1>我的主页</h1>
+    {% if user.userSign != None %}
+    <sup>{{ user.userSign }}</sup><br>
+    {% endif %}
+        <div style="padding: 20px 100px">
+            <span>ID：</span><p id="userID">{{user.userID}}</p><br><br>
+            <span>账号：</span><p id="userAccount">{{user.userAccount}}</p><br><br>
+            <span>昵称：</span><p id="userName">{{user.userName}}</p><br><br>
+            <span hidden>密码：</span><p id="Pwd" hidden>{{user.userPwd}}</p>
+            <span>年龄：</span><p id="userAge">{% if user.userAge %}{{user.userAge}}{% else %}暂无{% endif %}</p><br><br>
+            <span>城市：</span><p id="userCity">{% if user.userCity %}{{user.userCity}}{% else %}暂无{% endif %}</p><br><br>
+            <span>行业：</span><p id="userIndustry">{% if user.userIndustry %}{{user.userIndustry}}{% else %}暂无{% endif %}</p><br><br>
+            <span>职业：</span><p id="userProfession">{% if user.userProfession %}{{user.userProfession}}{% else %}暂无{% endif %}</p><br><br>
+            <span>公司：</span><p id="userCompany">{% if user.userCompany %}{{user.userCompany}}{% else %}暂无{% endif %}</p><br><br>
+            <span>签名：</span><p id="userSign">{% if user.userSign %}{{user.userSign}}{% else %}暂无{% endif %}</p><br><br>
+            <span>权限：</span><p id="Admin">{% if user.Admin == 1 %}管理员{% else %}普通用户{% endif %}</p><br><br>
+            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#edit"
+                        data-whatever="{{ user.userID }}">编辑
+                </button>
+        </div>
+</div>
+
+<script>
+
+    $('#sub').click(function(){
+        var id = $('#id').val()
+        var name = $('#name').val()
+        var account = $('#account').val()
+        var userpwd = $('#userpwd').val()
+        var againpwd = $('#againpwd').val()
+        $.post('/updateuser',{'userid':id,'username':name,'useraccount':account,'userpwd':userpwd,'againpwd':againpwd}).done(result)
+    })
+
+    var result = function(data){
+        alert(data)
+        window.location.reload();
+    }
+
+    $('#edit').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var id = button.data('whatever') // Extract info from data-* attributes
+//        var name = document.getElementById("table").rows[id].cells[1].innerText;
+//        var account = document.getElementById("table").rows[id].cells[2].innerText;
+//        var userpwd = document.getElementById("table").rows[id].cells[3].innerText;
+        console.log("xxx")
+        var name = document.getElementById("userName").innerText
+        var account = document.getElementById("userAccount").innerText
+        var userpwd = document.getElementById("Pwd").innerText
+        var age = document.getElementById("userAge").innerText
+        var city = document.getElementById("userCity").innerText
+        var industry = document.getElementById("userIndustry").innerText
+        var profession = document.getElementById("userProfession").innerText
+        var company = document.getElementById("userCompany").innerText
+        var sign = document.getElementById("userSign").innerText
+
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+        modal.find('.modal-title').text('编辑' + name)
+        //modal.find('.modal-body input').val(id)
+        $('#id').val(id)
+        $('#name').val(name)
+        $('#account').val(account)
+        $('#userpwd').val(userpwd)
+        $('#againpwd').val(userpwd)
+        $('#age').val(age)
+        $('#city').val(city)
+        $('#industry').val(industry)
+        $('#profession').val(profession)
+        $('#company').val(company)
+        $('#sign').val(sign)
+
+    })
+</script>
+{% endblock %}

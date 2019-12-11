@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>统计查询</title>
+<script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+<script src="{{ url_for('static', filename='js/echarts.min.js') }}"></script>
+<!--<script src="{{ url_for('static', filename='js/charts.js') }}"></script>-->
+{% endblock %}
+
+{% block main %}
+
+<div style="overflow: auto;height: 100%;padding: 20px 10px">
+    <div class="form-group">
+        <form id="form1" method="post" action='/statistics'>
+            <label><input id="search" class="form-control" type="text" name="search" placeholder=""></label>
+            <input class="btn btn-default" type="button" id="sub" value="查询">
+        </form>
+    {% if user %}
+        <button class="btn btn-primary" type="button" onclick="collect()">收藏此页 <span class="badge" id="collectnum"></span></button>
+    {% endif %}
+
+    </div>
+    <div id="citychart" style="height:800px;border:1px solid #ccc;padding:10px;"></div>
+    <div id="salarychart" style="height:800px;border:1px solid #ccc;padding:10px;"></div>
+    <div id="educationchart" style="height:800px;border:1px solid #ccc;padding:10px;"></div>
+
+</div>
+
+
+<script>
+//     $(document).ready(function(){
+//        $('#a').hover(function() {
+//            $("#collectnum").css('display', 'block');
+//        }, function() {
+//           $("#collectnum").css('display', 'none');
+//        });
+//            $("#collectnum").hover(function() {
+//                $(this).css('display', 'block');;
+//            }, function() {
+//                $(this).css('display', 'none');
+//            });
+// })
+
+//ng-repeat
+    $("#sub").click(function () {
+//        $.ajax({
+//        type: "post",
+//        dataType: 'json',
+//        async: false,
+//        url: "/statistics",//此处填写你的url
+//          params : {}
+//        success: function (data) {//这个data就是返回来的json数据
+//            console.log(data)           //s就是Error
+//            update_chart(data)
+//        }
+//    });
+        var serach = document.getElementById("search").value;
+        if (serach == "") {
+            alert("查询内容不能为空");
+        }
+        else {
+            $.post('/statistics', {"search": serach}).done(update_citychart2, update_educationchart2, update_salarychart2,show_collectnum);
+        }
+    });
+
+
+    function check() {
+        var serach = document.getElementById("search").value;
+        if (serach == "") {
+            alert("查询内容不能为空");
+            return false;
+        }
+        //document.getElementById("form1").submit();
+
+    }
+
+    function collect(){
+        $.post('/collect',{"skillname":skillname}).done(result);
+    }
+
+    var result = function(data){
+        alert(data);
+    }
+
+    var cityChart = echarts.init(document.getElementById('citychart'));
+    var salaryChart = echarts.init(document.getElementById('salarychart'));
+    var educationChart = echarts.init(document.getElementById('educationchart'));
+
+    var myDate = new Date();
+    var skillname;
+    option = {
+        title: {
+            //text: '岗位总体城市分布饼图',
+            subtext: '数据来源于lagou.com\n'+myDate.toLocaleDateString(),     //获取当前日期
+            x: 'left'
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)",
+            "textStyle": {
+                "fontSize": 18
+            }
+        },
+        legend: {
+            orient: 'vertical',
+            left: 'left',
+            data: []
+        },
+        series: [
+            {
+                name: '岗位数',
+                type: 'pie',
+                radius: '55%',
+                center: ['50%', '60%'],
+                data: [],
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                },
+                 "label": {
+            "normal": {
+                "show": true,
+                "textStyle": {
+                    "fontSize": 18
+                }
+            },
+            "emphasis": {
+                "show": true
+            }
+        },
+            }
+        ]
+    };
+
+    cityChart.setOption(option);
+    salaryChart.setOption(option);
+    educationChart.setOption(option);
+    window.addEventListener("resize",function(){
+        cityChart.resize();
+        salaryChart.resize();
+        educationChart.resize();
+    });
+
+    var update_citychart1 = function (data) {
+        skillname = data.skillname
+        cityChart.hideLoading();
+        cityChart.setOption({
+            title: {
+                text: '岗位总体城市分布饼图'
+            },
+            series: [{
+                data: getseries_by_city(data)
+            }
+            ]
+        });
+
+    };
+    var update_citychart2 = function (data) {
+        skillname = data.skillname
+        cityChart.hideLoading();
+        cityChart.setOption({
+            title: {
+                text: data.skillname + '岗位城市分布饼图'
+            },
+            series: [{
+                data: getseries_by_city(data)
+            }
+            ]
+        });
+
+    };
+    function getseries_by_city(data) {
+        var serie = []
+        for (var i = 0; i < data.citynum.length; i++) {
+            var item = {
+                name: data.city[i],
+                value: data.citynum[i],
+
+            }
+            serie.push(item)
+        }
+        console.log(serie)
+        return serie
+    }
+
+    var update_salarychart1 = function (data) {
+        salaryChart.hideLoading();
+        salaryChart.setOption({
+            title: {
+                text: '岗位总体薪资分布饼图'
+            },
+            series: [{
+                data: getseries_by_salary(data)
+            }
+            ]
+        });
+
+    };
+    var update_salarychart2 = function (data) {
+        salaryChart.hideLoading();
+        salaryChart.setOption({
+            title: {
+                text: data.skillname + '岗位薪资分布饼图'
+            },
+            series: [{
+                data: getseries_by_salary(data)
+            }
+            ]
+        });
+
+    };
+    function getseries_by_salary(data) {
+        var serie = []
+        for (var i = 0; i < data.salarynum.length; i++) {
+            var item = {
+                name: data.salary[i],
+                value: data.salarynum[i],
+
+            }
+            serie.push(item)
+        }
+        console.log(serie)
+        return serie
+    }
+
+    var update_educationchart1 = function (data) {
+        educationChart.hideLoading();
+        educationChart.setOption({
+            title: {
+                text: '岗位总体学历分布饼图'
+            },
+            series: [{
+                data: getseries_by_education(data)
+            }
+            ]
+        });
+
+    };
+    var update_educationchart2 = function (data) {
+        educationChart.hideLoading();
+        educationChart.setOption({
+            title: {
+                text: data.skillname + '岗位学历分布饼图'
+            },
+            series: [{
+                data: getseries_by_education(data)
+            }
+            ]
+        });
+
+    };
+    function getseries_by_education(data) {
+        var serie = []
+        for (var i = 0; i < data.educationnum.length; i++) {
+            var item = {
+                name: data.education[i],
+                value: data.educationnum[i],
+
+            }
+            serie.push(item)
+        }
+        console.log(serie)
+        return serie
+    }
+
+    cityChart.showLoading();
+    salaryChart.showLoading();
+    educationChart.showLoading();
+
+    var show_collectnum = function(data){
+        document.getElementById("collectnum").innerText = data.collectnum
+    }
+
+    console.log("000")
+    // 异步加载数据 （首次，get，显示6个数据）
+    //$.get('/statistics').done(update_mychart);
+    console.log("111")
+    $.get('/alldata').done(update_citychart1, update_educationchart1, update_salarychart1,show_collectnum);
+    console.log('2222')
+
+</script>
+
+{% endblock %}

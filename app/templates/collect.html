@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>{{user.userName}}的收藏</title>
+{% endblock %}
+
+{% block main %}
+<h1>我的收藏</h1>
+<div style="width: 70%;float: left">
+    {% if collectinos_position %}
+    <div>
+        <h3>岗位信息收藏</h3>
+        <table class="table">
+            <tr>
+                <th>岗位编号</th>
+                <th width="180px">职位名称</th>
+                <th width="180px">公司简称</th>
+                <th>所在城市</th>
+                <th>基本薪资</th>
+                <th>学历要求</th>
+                <th>工作经验</th>
+                <th>发布时间</th>
+                <th>收藏时间</th>
+                <th></th>
+            </tr>
+            {% for position_and_collection in collectinos_position %}
+                <tr>
+                    <td height="57px"><a href="https://www.lagou.com/jobs/{{position_and_collection[0].positionId}}.html">{{ position_and_collection[0].positionId }}</a></td>
+                    <td height="57px">{{ position_and_collection[0].positionName }}</td>
+                    <td height="57px">{{ position_and_collection[0].companyShortName }}</td>
+                    <td height="57px">{{ position_and_collection[0].city }}</td>
+                    <td height="57px">{{ position_and_collection[0].salary }}</td>
+                    <td height="57px">{{ position_and_collection[0].education }}</td>
+                    <td height="57px">{{ position_and_collection[0].workYear }}</td>
+                    <td height="57px">{{ position_and_collection[0].createTime }}</td>
+                    <td>{{ position_and_collection[1].collectDate }}</td>
+                    <td><a onclick="delete_collect({{ position_and_collection[1].collectID }})">删除</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% else %}
+    <div>
+        <p>还没有收藏</p>
+    </div>
+    {% endif %}
+</div>
+<div style="width: 29%;float: right">
+    {% if collections_statistics %}
+    <div>
+        <h3>统计信息收藏</h3>
+        <table class="table">
+            <tr>
+                <th>收藏编号</th>
+                <th>收藏日期</th>
+                <th>查询内容</th>
+                <th></th>
+                <th></th>
+            </tr>
+            {% for collection in collections_statistics %}
+                <tr>
+                    <td>{{ collection.collectID }}</td>
+                    <td>{{ collection.collectDate }}</td>
+                    <td>{{ collection.queryName }}</td>
+                    <td><a href="{{url_for('main.detail',statisticsID=collection.statisticsID)}}">详情</a></td>
+                    <td><a onclick="delete_collect({{ collection.collectID }})">删除</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% else %}
+    <div>
+        <p>还没有收藏</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function delete_collect(collectid){
+        $.post('/delete_collect',{"collectid":collectid}).done(result);
+    }
+    var result = function(data){
+        alert(data);
+        window.location.reload();
+    }
+</script>
+
+{% endblock %}

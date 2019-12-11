@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>spider</title>
+
+
+
+
+{% endblock %}
+
+{% block main %}
+<div style="width: 40%;float: left">
+    <div class="form-group">
+        <h3>批量爬取</h3>
+        <form method="post" action="/spider">
+            目标URL：<input class="form-control" type="text" name="url" id="url" value="https://www.lagou.com/jobs/positionAjax.json" disabled>
+            爬取范围：<input class="form-control" type="text" name="startskill" id="startskill"> - <input class="form-control" type="text" name="endskill" id="endskill">
+            爬取页面数：<input class="form-control" type="text" name="pagerange" id="pagerange">
+            <input class="btn btn-default" type="button" id="sub" class="btn btn-default" value="爬取数据">
+            <br>
+        </form>
+    </div>
+     <br>
+        <br>
+    <div class="form-group">
+        <h3>按关键字爬取</h3>
+        <div style="float: left">
+        <form method="post">
+            增加关键字：<input style="width: 150px" class="form-control" type="text" name="addkeyword" id="addkeyword">
+            <input  class="btn btn-default" type="button" id="sub_add" class="btn btn-default" value="增加">
+        </form>
+        </div>
+        <div style="float: right;">
+        <form method="post">
+            关键字：<input style="width: 150px" class="form-control" type="text" name="keyword" id="keyword">
+            <input  class="btn btn-default" type="button" id="sub_key" class="btn btn-default" value="爬取数据">
+        </form>
+        </div>
+    </div>
+</div>
+
+<div style="float: right">
+    {% for s in skill %}
+    {% if s.skillID <= 30 %}
+    <a>{{s.skillID}}:{{s.skillName}}</a><br>
+    {% endif %}
+    {% endfor %}
+</div>
+<div style="float: right">
+    {% for s in skill %}
+    {% if s.skillID > 30 %}
+    <a>{{s.skillID}}:{{s.skillName}}</a><br>
+    {% endif %}
+    {% endfor %}
+</div>
+
+
+
+
+
+<script>
+    var spiderstate = 2
+
+    $("#sub").click(function () {
+        var startskill = document.getElementById('startskill').value
+        var endskill = document.getElementById('endskill').value
+        var pagerange = document.getElementById('pagerange').value
+        var url = document.getElementById('url').value
+        console.log(startskill)
+        console.log(endskill)
+        console.log(pagerange)
+        console.log(url)
+        if(startskill!= '' && endskill != '' && pagerange != '' && url != ''){
+            $.post('/spider', {"startskill": startskill, "endskill": endskill, "pagerange": pagerange,"url":url}).done(result)
+        }
+        else{
+            alert("请确认爬虫运行条件填写完整")
+        }
+    })
+
+    $("#sub_add").click(function(){
+        var keyword = document.getElementById('addkeyword').value
+        if(keyword != '') {
+            $.post('/add_keyword', {'keyword': keyword}).done(result)
+        }
+        else {
+            alert("请输入要增加的关键字")
+        }
+    })
+
+    $("#sub_key").click(function(){
+        var keyword = document.getElementById('keyword').value
+        var url = document.getElementById('url').value
+        if(keyword != '') {
+            $.post('/spider_keyword',{'keyword':keyword,"url": url}).done(result)
+        }
+        else {
+            alert("请输入要爬取的关键字")
+        }
+    })
+
+    var result = function (data) {
+        alert(data)
+    }
+
+</script>
+{% endblock %}

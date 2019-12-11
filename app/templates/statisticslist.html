@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--
+    <link rel="stylesheet" href="../static/css/header.css" type="text/css">
+    -->
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 最新的 jquery 核心 JavaScript 文件 -->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <!-- 最新的 font-awesome 核心 css 文件 -->
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{url_for('static',filename = 'css/base.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename = 'css/simple.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename = '')}}">
+<script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+    <title>用户列表</title>
+</head>
+<body>
+<div style="overflow: auto;height: 100%">
+    <table class="table">
+        <tr>
+            <th>统计编号</th>
+            <th>城市列表</th>
+            <th>城市数据</th>
+            <th>薪资列表</th>
+            <th>薪资数据</th>
+            <th>学历列表</th>
+            <th>学历数据</th>
+            <th>查询日期</th>
+        </tr>
+        {% for r in result %}
+        <tr>
+            <td >{{ r.statID }}</td>
+            <td height="57px"><div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100px;">{{ r.city }}</div></td>
+            <td height="57px"><div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100px;">{{ r.cityNum }}</div></td>
+            <td height="57px"><div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100px;">{{ r.salary }}</div></td>
+            <td height="57px"><div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100px;">{{ r.salaryNum }}</div></td>
+            <td height="57px"><div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100px;">{{ r.education }}</div></td>
+            <td height="57px"><div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100px;">{{ r.educationNum }}</div></td>
+            <td height="57px"><div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100px;">{{ r.queryDate }}</div></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <nav aria-label="Page navigation" style="text-align: center">
+        <ul class="pagination">
+            <li>
+
+                <a href="#" onclick="showAtRight('{{url_for('main.statisticslist',page=pagination.page-1)}}')"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% for p in pagination.iter_pages() %}
+            <li class="{% if pagination.page == p %}active{% endif %}">
+                {% if p == None %}
+                <a class="disabled" href="#">...</a>
+                {% else %}
+
+                <a href="#" onclick="showAtRight('{{url_for('main.statisticslist',page=p)}}')">{{p}}</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+            <li>
+
+                <a href="#" onclick="showAtRight('{{url_for('main.statisticslist',page=pagination.page+1)}}')"
+                   aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<script>
+
+</script>
+</body>
